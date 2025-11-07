@@ -33,5 +33,27 @@ solana program deploy ./target/deploy/hello.so
 Execute demo script
 ```shell
 PROGRAM_ID=your program ID
-cargo run --example demo $PROGRAM_ID
+RPC=https://api.devnet.solana.com
+KEYPAIR_PATH=path to key pair
+
+cargo run --example demo $PROGRAM_ID $RPC $KEYPAIR_PATH
+```
+
+# Deploy
+
+```shell
+solana config set -ud
+
+solana balance
+solana airdrop 1
+
+cargo build-sbf
+
+solana program deploy ./target/deploy/hello.so
+
+PROGRAM_ID=your program ID
+RPC=https://api.devnet.solana.com
+KEYPAIR_PATH=path to key pair
+
+cargo run --example demo $PROGRAM_ID $RPC $KEYPAIR_PATH
 ```

@@ -3,27 +3,31 @@ use solana_sdk::{
     commitment_config::CommitmentConfig,
     instruction::Instruction,
     pubkey::Pubkey,
-    signature::{Keypair, Signer},
+    signature::{Keypair, Signer, read_keypair_file},
     transaction::Transaction,
 };
 use solana_transaction_status_client_types::{
     UiTransactionEncoding, option_serializer::OptionSerializer,
 };
+use std::path::PathBuf;
 use std::str::FromStr;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
+    println!("ARGS {:?}", args);
+
     let program_id = Pubkey::from_str(&args[1]).expect("Invalid program ID");
 
     // Connect to local cluster
-    let rpc_url = String::from("http://localhost:8899");
+    let rpc_url = String::from(&args[2]);
     let client = RpcClient::new_with_commitment(rpc_url, CommitmentConfig::confirmed());
 
-    // Generate a new keypair for paying fees
-    let payer = Keypair::new();
+    let keypair_path: PathBuf = [&args[3]].iter().collect();
+    let payer = read_keypair_file(keypair_path).expect("Cannot read keypair file");
 
     // Request airdrop of 1 SOL for transaction fees
+    /*
     println!("Requesting airdrop...");
     let airdrop_signature = client
         .request_airdrop(&payer.pubkey(), 1_000_000_000)
@@ -37,6 +41,7 @@ fn main() {
         std::thread::sleep(std::time::Duration::from_millis(500));
     }
     println!("Airdrop confirmed");
+    */
 
     // Create the instruction
     let ix = Instruction::new_with_borsh(

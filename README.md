@@ -15,6 +15,8 @@
     - Install
     - CLI basics
     - Wallet
+    - Exercises
+        - native, anchor, exercise, solution
 
 # Core concepts
 - Solana vs Ethereum
@@ -42,10 +44,14 @@
     - `msg`
     - Build, test, deploy
     - `cargo build-sbf`
-    - LiteSVM
-    - Script
-        - `solana-test-calidator`
-        - `.so`
+    - Test
+        - LiteSVM
+        - Script
+            - `solana-test-calidator`
+            - `.so`
+    - Deploy
+        - [Solana explorer](https://explorer.solana.com/)
+    - TODO: exercise
 - Anchor
 - TODO: deploy, run Solana script on Anchor programs?
 
@@ -74,4 +80,5 @@
     - [Installation](https://solana.com/docs/intro/installation)
 - [Anchor](https://github.com/solana-foundation/anchor)
 - [solana-developers/program-examples](https://github.com/solana-developers/program-examples)
+- [Solana explorer](https://explorer.solana.com/)
 - [crates.io](https://crates.io/)
