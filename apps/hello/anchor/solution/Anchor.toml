@@ -1,0 +1,21 @@
+[toolchain]
+package_manager = "yarn"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+hello = "3cWVVxc4maKa8tWdhFSizoKGfsEVZcS8ubZBi2WgvUgy"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+# Deploy to Devnet
+# cluster = "Devnet"
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "cargo test"

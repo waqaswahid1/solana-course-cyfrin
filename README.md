@@ -2,6 +2,10 @@
 
 # Course intro
 
+- Solana CLI 3.0
+- Solana SDK and program 2.2
+- Anchor 0.31
+
 - [ ] [Course intro](./notes/course_intro.md)
     - Prerequisites
         - Rust
@@ -25,6 +29,7 @@
     - data
     - lamports
     - owner
+    - rent
 - Programs
     - program id - how is it derived?
     - Private key needed for upgrade
@@ -37,23 +42,29 @@
 - PDA (program derived address)
     - no private key
 - CPI (cross program invocation)
+- IDL
 
 # Hello
-- [ ] Native
+- [ ] [Native](./apps/hello/native)
     - Borsh
     - `entrypoint`
     - `msg`
     - Build, test, deploy
     - `cargo build-sbf`
     - Test
-        - LiteSVM
+        - TODO: mollusk
         - Script
             - `solana-test-calidator`
             - `.so`
     - Deploy
         - [Solana explorer](https://explorer.solana.com/)
     - Exercises
-- [ ] Anchor
+- [ ] [Anchor](./apps/hello/anchor)
+    - `anchor init hello --test-template rust`
+    - https://www.anchor-lang.com/docs/basics/program-structure
+        - `declare_id` -> Anchor.toml
+        - `#program`
+        - `Accounts`
 
 # Oracle
 - Native
@@ -77,8 +88,9 @@
 # Resources
 
 - [Solana docs](https://solana.com/docs)
-    - [Installation](https://solana.com/docs/intro/installation)
-- [Anchor](https://github.com/solana-foundation/anchor)
-- [solana-developers/program-examples](https://github.com/solana-developers/program-examples)
+- [GitHub - Anchor](https://github.com/solana-foundation/anchor)
+- [Anchor doc](https://www.anchor-lang.com/docs)
+- [GitHub - solana-developers/program-examples](https://github.com/solana-developers/program-examples)
 - [Solana explorer](https://explorer.solana.com/)
 - [crates.io](https://crates.io/)
+- [Solana playground](https://beta.solpg.io/)

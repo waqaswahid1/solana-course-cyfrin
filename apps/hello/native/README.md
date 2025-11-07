@@ -66,3 +66,8 @@ cargo run --example demo $KEYPAIR $RPC $PROGRAM_ID
 ```
 
 Check transaction signature at [Solana explorer](https://explorer.solana.com/?cluster=devnet)
+
+Close program to reclaim SOL
+```shell
+solana program close $PROGRAM_ID
+```
