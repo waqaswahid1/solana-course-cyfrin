@@ -17,15 +17,8 @@ pub fn update(
     let mut data = oracle_account.data.borrow_mut();
     let mut oracle = Oracle::try_from_slice(&data)?;
 
-    if !signer.is_signer {
-        return Err(ProgramError::MissingRequiredSignature);
-    }
+    // write your code here
 
-    if oracle.owner != *signer.key {
-        return Err(ProgramError::IllegalOwner);
-    }
-
-    oracle.price = price;
     oracle.serialize(&mut &mut data[..])?;
 
     Ok(())

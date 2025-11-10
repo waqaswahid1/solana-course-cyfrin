@@ -67,8 +67,10 @@
 
 # Oracle
 - [ ] [Native](./apps/oracle/native)
+    - State - Borsh
     - Program owns oracle account
     - Program owns oracle account
+    - Oracle data space
     - Order of account is important
 - [ ] [Anchor](./apps/oracle/anchor)
 
