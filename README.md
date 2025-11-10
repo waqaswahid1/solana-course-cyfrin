@@ -72,7 +72,15 @@
     - Program owns oracle account
     - Oracle data space
     - Order of account is important
+    - `owner` must sign
 - [ ] [Anchor](./apps/oracle/anchor)
+    - `anchor keys sync`
+    - `InitSpace`
+    - `Signer`
+    - `mut`
+    - `init`
+    - `constraint`
+    - Discriminator
 
 # Piggy bank - PDA
 - [ ] [Native](./apps/piggy-bank/native)

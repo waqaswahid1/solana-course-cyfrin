@@ -26,7 +26,7 @@ fn test() {
         .accounts(hello::accounts::Initialize {})
         .args(hello::instruction::Initialize {})
         .send()
-        .expect("");
+        .unwrap();
 
     println!("Your transaction signature {}", tx);
 }
