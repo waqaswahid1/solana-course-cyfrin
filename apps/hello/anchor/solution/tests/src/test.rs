@@ -9,8 +9,8 @@ use anchor_client::{
 };
 
 #[test]
-fn test_initialize() {
-    let program_id = "3cWVVxc4maKa8tWdhFSizoKGfsEVZcS8ubZBi2WgvUgy";
+fn test() {
+    let program_id = hello::ID;
     let anchor_wallet = std::env::var("ANCHOR_WALLET").unwrap();
     let payer = read_keypair_file(&anchor_wallet).unwrap();
 
@@ -19,7 +19,6 @@ fn test_initialize() {
         &payer,
         CommitmentConfig::confirmed(),
     );
-    let program_id = Pubkey::from_str(program_id).unwrap();
     let program = client.program(program_id).unwrap();
 
     let tx = program
