@@ -1,5 +1,6 @@
-/*
 use solana_client::rpc_client::RpcClient;
+use solana_program::system_program;
+use solana_program::sysvar::{Sysvar, clock::Clock, rent::Rent};
 use solana_sdk::{
     commitment_config::CommitmentConfig,
     instruction::{AccountMeta, Instruction},
@@ -13,8 +14,8 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use borsh::BorshDeserialize;
-use oracle::Cmd;
-use oracle::state::Oracle;
+use piggy::Cmd;
+use piggy::state::Lock;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -55,10 +56,12 @@ fn main() {
         println!("Airdrop confirmed");
     }
 
-    // Create Oracle account, owned by the Oracle program if it doesn't exist
-    // let seed = [1u8; 32];
-    // let oracle_account = keypair_from_seed(&seed).unwrap();
-    let oracle_account = Keypair::new();
+    let dst = Keypair::new();
+
+    let (pda, bump) = Pubkey::find_program_address(
+        &[b"lock", payer.pubkey().as_ref(), dst.pubkey().as_ref()],
+        &program_id,
+    );
 
     // 32 + 8
     let space = 40;
@@ -66,39 +69,38 @@ fn main() {
         .get_minimum_balance_for_rent_exemption(space)
         .unwrap();
 
-    let create_account_ix = system_instruction::create_account(
-        &payer.pubkey(),
-        &oracle_account.pubkey(),
-        lamports,
-        space as u64,
-        &program_id,
-    );
-
-    let mut tx = Transaction::new_with_payer(
-        &[create_account_ix],
-        Some(&payer.pubkey()),
-    );
-
-    let blockhash = client.get_latest_blockhash().expect("blockhash");
-    tx.sign(&[&payer, &oracle_account], blockhash);
-
-    let res = client.send_and_confirm_transaction(&tx);
-    match res {
-        Ok(_) => println!("Created Oracle account {}", oracle_account.pubkey()),
-        Err(err) => println!("Err creating coutner account: {:#?}", err),
-    }
-
     // Initialize
-    let cmd = Cmd::Init(payer.pubkey(), 1);
+    let now = client.get_block_time(client.get_slot().unwrap()).unwrap() as u64;
+    let amt = 1e9 as u64;
+    let exp = now + 100;
+
+    let cmd = Cmd::Lock {
+        dst: dst.pubkey(),
+        amt,
+        exp,
+        bump,
+    };
 
     let ix = Instruction::new_with_borsh(
         program_id,
         &cmd,
-        vec![AccountMeta {
-            pubkey: oracle_account.pubkey(),
-            is_signer: false,
-            is_writable: true,
-        }],
+        vec![
+            AccountMeta {
+                pubkey: payer.pubkey(),
+                is_signer: true,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: pda,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: system_program::ID,
+                is_signer: false,
+                is_writable: true,
+            },
+        ],
     );
 
     let mut tx = Transaction::new_with_payer(&[ix], Some(&payer.pubkey()));
@@ -108,17 +110,20 @@ fn main() {
         Ok(sig) => println!("Transaction signature: {}", sig),
         Err(err) => eprintln!("Error sending transaction: {}", err),
     }
+    /*
 
     let data = client
         .get_account_data(&oracle_account.pubkey())
         .expect("Failed to fetch account data");
 
     let oracle_data =
-        Oracle::try_from_slice(&data).expect("Failed to deserialize");
+        Lock::try_from_slice(&data).expect("Failed to deserialize");
 
     println!("oracle.owner: {:?}", oracle_data.owner);
     println!("oracle.price: {:?}", oracle_data.price);
+    */
 
+    /*
     // Update
     let cmd = Cmd::Update(2); // set initial price to 0
 
@@ -156,6 +161,5 @@ fn main() {
 
     println!("oracle.owner: {:?}", oracle_data.owner);
     println!("oracle.price: {:?}", oracle_data.price);
+    */
 }
-*/
-fn main() {}

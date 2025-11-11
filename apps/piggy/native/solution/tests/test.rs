@@ -1,12 +1,7 @@
 use borsh::BorshDeserialize;
 use litesvm::LiteSVM;
-use solana_program::{
-    pubkey::Pubkey,
-    system_program,
-    sysvar::{Sysvar, clock::Clock},
-};
+use solana_program::{pubkey::Pubkey, system_program, sysvar::clock::Clock};
 use solana_sdk::{
-    account::Account,
     instruction::{AccountMeta, Instruction},
     signature::{Keypair, Signer},
     transaction::Transaction,
@@ -20,7 +15,6 @@ fn test() {
 
     let payer = Keypair::new();
     let dst = Keypair::new();
-    let attacker = Keypair::new();
 
     let program_keypair = Keypair::new();
     let program_id = program_keypair.pubkey();
