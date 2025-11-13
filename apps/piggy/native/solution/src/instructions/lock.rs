@@ -15,18 +15,23 @@ use crate::state::Lock;
 pub fn lock(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
-    dst: Pubkey,
     amt: u64,
     exp: u64,
     bump: u8,
 ) -> Result<(), ProgramError> {
     let account_iter = &mut accounts.iter();
     let payer = next_account_info(account_iter)?;
+    let dst = next_account_info(account_iter)?;
     let pda = next_account_info(account_iter)?;
     let sys_program = next_account_info(account_iter)?;
 
+    // Check dst signed, verifies dst exists and approved to later receive SOL
+    if !dst.is_signer {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
+
     // Check that the given account key matches expected PDA
-    if *pda.key != get_pda(program_id, payer.key, &dst, bump)? {
+    if *pda.key != get_pda(program_id, payer.key, &dst.key, bump)? {
         return Err(ProgramError::InvalidSeeds);
     }
 
@@ -57,7 +62,7 @@ pub fn lock(
             program_id,
         ),
         &[payer.clone(), pda.clone(), sys_program.clone()],
-        &[&[b"lock", payer.key.as_ref(), dst.as_ref(), &[bump]]],
+        &[&[b"lock", payer.key.as_ref(), dst.key.as_ref(), &[bump]]],
     )?;
 
     // Transfer SOL from payer to PDA
@@ -68,7 +73,7 @@ pub fn lock(
 
     // Create and save lock state into PDA data
     let mut data = pda.data.borrow_mut();
-    let lock = Lock { dst, exp };
+    let lock = Lock { dst: *dst.key, exp };
     lock.serialize(&mut &mut data[..])?;
 
     msg!("Lock created: amt={}, exp={}", amt, exp);
