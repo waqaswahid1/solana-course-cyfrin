@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 
+pub mod error;
 pub mod instructions;
 pub mod state;
 
@@ -10,13 +11,13 @@ pub mod piggy {
     pub use super::instructions::*;
     use super::*;
 
-    pub fn lock(ctx: Context<Lock>, price: u64) -> Result<()> {
-        instructions::lock(ctx, price)?;
+    pub fn lock(ctx: Context<Lock>, amt: u64, exp: u64) -> Result<()> {
+        instructions::lock(ctx, amt, exp)?;
         Ok(())
     }
 
-    pub fn unlock(ctx: Context<Unlock>, price: u64) -> Result<()> {
-        instructions::unlock(ctx, price)?;
+    pub fn unlock(ctx: Context<Unlock>) -> Result<()> {
+        instructions::unlock(ctx)?;
         Ok(())
     }
 }
