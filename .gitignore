@@ -4,3 +4,4 @@ Cargo.lock
 .env
 test-ledger
 .anchor
+yarn.lock

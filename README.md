@@ -86,6 +86,7 @@
 
 # Piggy bank - PDA
 - [ ] [Native](./apps/piggy-bank/native)
+    - CPI - invoke
     - Calculate PDA before PDA is initialized
     - Create PDA
     - Transfer SOL
@@ -94,14 +95,14 @@
 - [ ] [Anchor](./apps/piggy-bank/anchor)
     - PDA bump, init and close
 
-# Dutch auction ? - Token
-- CLI
-- Native
-- Anchor
+# Dutch auction
+- Token CLI
+- [ ] [Anchor](./apps/auction/anchor)
+- [ ] [Native](./apps/auction/native)
 
 # AMM
-- [ ] [Native](./apps/amm/native)
 - [ ] [Anchor](./apps/amm/anchor)
+- [ ] [Native](./apps/amm/native)
 
 # Wormhole
 
