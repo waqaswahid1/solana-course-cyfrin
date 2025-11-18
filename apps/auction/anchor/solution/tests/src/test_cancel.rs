@@ -10,7 +10,7 @@ use super::test_helper;
 use super::token_helper;
 
 #[test]
-fn test_init_cancel() {
+fn test_cancel() {
     let anchor_wallet = std::env::var("ANCHOR_WALLET").unwrap();
     let payer = read_keypair_file(&anchor_wallet).unwrap();
 

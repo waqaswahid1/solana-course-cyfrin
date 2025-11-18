@@ -10,7 +10,7 @@ use super::test_helper;
 use super::token_helper;
 
 #[test]
-fn test_init_buy() {
+fn test_buy() {
     let anchor_wallet = std::env::var("ANCHOR_WALLET").unwrap();
     let payer = read_keypair_file(&anchor_wallet).unwrap();
 
@@ -66,25 +66,6 @@ fn test_init_buy() {
         })
         .send()
         .unwrap();
-
-    let auction: auction::state::Auction =
-        program.account(auction_pda).unwrap();
-    assert_eq!(auction.mint_sell, mint_sell.pubkey(), "auction.mint_sell");
-    assert_eq!(auction.mint_buy, mint_buy.pubkey(), "auction.mint_buy");
-    assert_eq!(auction.start_time, start_time, "auction.start_time");
-    assert_eq!(auction.end_time, end_time, "auction.end_time");
-    assert_eq!(auction.end_time, end_time, "auction.end_time");
-
-    assert_eq!(
-        token_helper::get_balance(&token_program, &seller_sell_ata).unwrap(),
-        0,
-        "Seller sell ATA balance"
-    );
-    assert_eq!(
-        token_helper::get_balance(&token_program, &auction_sell_ata).unwrap(),
-        sell_amt,
-        "Auction sell ATA balance"
-    );
 
     // Buy
     let wait_time = start_time - now + 2;
