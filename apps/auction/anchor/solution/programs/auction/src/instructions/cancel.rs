@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::Token,
     token_interface::{
         close_account, CloseAccount, Mint, TokenAccount, TokenInterface,
     },
@@ -81,6 +80,5 @@ pub fn cancel(ctx: Context<Cancel>) -> Result<()> {
         &[seeds],
     ))?;
 
-    // Close auction_sell_ata
     Ok(())
 }

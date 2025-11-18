@@ -1,124 +1,33 @@
 use anchor_client::solana_sdk::signature::Signer;
-use anchor_client::{
-    solana_sdk::{
-        commitment_config::CommitmentConfig,
-        pubkey::Pubkey,
-        signature::{read_keypair_file, Keypair},
-        system_instruction, system_program,
-        transaction::Transaction,
-    },
-    Client, Cluster, Program,
-};
+use anchor_client::solana_sdk::{signature::read_keypair_file, system_program};
 use anchor_spl::associated_token::{
-    self, get_associated_token_address, spl_associated_token_account,
+    get_associated_token_address, spl_associated_token_account,
 };
-use anchor_spl::token::spl_token::solana_program::program_pack::Pack;
-use anchor_spl::token::{self, spl_token, Mint, Token};
-use std::str::FromStr;
+use anchor_spl::token::{self};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use super::test_helper;
 use super::token_helper;
-use auction;
-
-// TODO:
-// test init
-// test buy
-// test cancel
 
 #[test]
-fn test() {
-    let program_id = auction::ID;
+fn test_init_buy() {
     let anchor_wallet = std::env::var("ANCHOR_WALLET").unwrap();
     let payer = read_keypair_file(&anchor_wallet).unwrap();
 
-    // Seller and buyer
-    let seller = payer;
-    let buyer = Keypair::new();
-
-    let client = Client::new_with_options(
-        Cluster::Localnet,
-        &seller,
-        CommitmentConfig::confirmed(),
-    );
-    let program = client.program(program_id).unwrap();
-
-    let rpc = program.rpc();
-
-    // Airdrop
-    rpc.request_airdrop(&seller.pubkey(), 100 * (1e9 as u64))
-        .unwrap();
-    rpc.request_airdrop(&buyer.pubkey(), 100 * (1e9 as u64))
-        .unwrap();
-
-    // Mint sell and buy tokens
-    let token_program = client.program(token::ID).unwrap();
-    let mint_sell = Keypair::new();
-    let mint_buy = Keypair::new();
-
-    token_helper::create_mint(&token_program, &seller, &mint_sell, 6);
-    token_helper::create_mint(&token_program, &seller, &mint_buy, 6);
-
-    // Create associated token accounts
-    let seller_sell_ata = token_helper::create_ata(
-        &token_program,
-        &seller,
-        &mint_sell.pubkey(),
-        &seller.pubkey(),
-    )
-    .unwrap();
-
-    let buyer_sell_ata = token_helper::create_ata(
-        &token_program,
-        &seller,
-        &mint_sell.pubkey(),
-        &buyer.pubkey(),
-    )
-    .unwrap();
-
-    let seller_buy_ata = token_helper::create_ata(
-        &token_program,
-        &seller,
-        &mint_buy.pubkey(),
-        &seller.pubkey(),
-    )
-    .unwrap();
-
-    let buyer_buy_ata = token_helper::create_ata(
-        &token_program,
-        &seller,
-        &mint_buy.pubkey(),
-        &buyer.pubkey(),
-    )
-    .unwrap();
-
-    // Mint tokens
-    token_helper::mint_to(
-        &token_program,
-        &seller,
-        &mint_sell.pubkey(),
-        &seller_sell_ata,
-        100 * (1e6 as u64),
-    )
-    .unwrap();
-    token_helper::mint_to(
-        &token_program,
-        &seller,
-        &mint_buy.pubkey(),
-        &buyer_buy_ata,
-        200 * (1e6 as u64),
-    )
-    .unwrap();
-
-    // Calculate Auction PDA
-    let (pda, bump) = Pubkey::find_program_address(
-        &[
-            auction::state::Auction::SEED_PREFIX,
-            &seller.pubkey().as_ref(),
-            mint_sell.pubkey().as_ref(),
-            mint_buy.pubkey().as_ref(),
-        ],
-        &program_id,
-    );
+    let test_helper::Test {
+        program,
+        token_program,
+        seller,
+        buyer,
+        auction_pda,
+        auction_bump,
+        mint_sell,
+        mint_buy,
+        seller_sell_ata,
+        buyer_sell_ata,
+        seller_buy_ata,
+        buyer_buy_ata,
+    } = test_helper::set_up(&payer);
 
     // Init
     let now = SystemTime::now()
@@ -131,7 +40,7 @@ fn test() {
     let end_time = start_time + 10;
     let sell_amt = 100 * (1e6 as u64);
     let auction_sell_ata =
-        get_associated_token_address(&pda, &mint_sell.pubkey());
+        get_associated_token_address(&auction_pda, &mint_sell.pubkey());
 
     program
         .request()
@@ -139,7 +48,7 @@ fn test() {
             payer: seller.pubkey(),
             mint_sell: mint_sell.pubkey(),
             mint_buy: mint_buy.pubkey(),
-            auction: pda,
+            auction: auction_pda,
             auction_sell_ata,
             seller_sell_ata,
             seller_buy_ata,
@@ -158,7 +67,8 @@ fn test() {
         .send()
         .unwrap();
 
-    let auction: auction::state::Auction = program.account(pda).unwrap();
+    let auction: auction::state::Auction =
+        program.account(auction_pda).unwrap();
     assert_eq!(auction.mint_sell, mint_sell.pubkey(), "auction.mint_sell");
     assert_eq!(auction.mint_buy, mint_buy.pubkey(), "auction.mint_buy");
     assert_eq!(auction.start_time, start_time, "auction.start_time");
@@ -177,7 +87,7 @@ fn test() {
     );
 
     // Buy
-    let wait_time = start_time - now + 1;
+    let wait_time = start_time - now + 2;
     println!("Waiting {:?} seconds for auction to start", wait_time);
     std::thread::sleep(std::time::Duration::from_secs(wait_time));
 
@@ -188,7 +98,7 @@ fn test() {
             seller: seller.pubkey(),
             mint_sell: mint_sell.pubkey(),
             mint_buy: mint_buy.pubkey(),
-            auction: pda,
+            auction: auction_pda,
             auction_sell_ata,
             buyer_buy_ata,
             buyer_sell_ata,
@@ -205,7 +115,9 @@ fn test() {
         .unwrap();
 
     assert!(
-        program.account::<auction::state::Auction>(pda).is_err(),
+        program
+            .account::<auction::state::Auction>(auction_pda)
+            .is_err(),
         "Auction not closed"
     );
 
