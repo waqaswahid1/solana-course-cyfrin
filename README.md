@@ -24,6 +24,7 @@
             - README is exercise
         - Debug
             - `msg`
+        - Anchor tests in Rust are unreliable
 
 # Core concepts
 - Solana vs Ethereum
@@ -41,6 +42,7 @@
     - BPF loader
     - System program
     - Token program
+    - [Limitations](https://solana.com/docs/programs/limitations)
 - Instructions
 - Transactions
 - PDA (program derived address)
@@ -98,7 +100,20 @@
     - PDA bump, init and close
 
 # Dutch auction
-- Token CLI
+- [ ] [SPL Token](./notes/spl.png)
+    - Mint
+        - https://solana.com/docs/tokens/basics/create-mint
+        - 1. Create mint account
+        - 2. Initialize Mint data
+    - Mint authority
+    - Token account
+    - Associated token account (ATA)
+- [ ] [Token CLI](./notes/token.md)
+    - Create mint
+        - Mint account state
+        - Mint authority
+    - Create token account
+    - Mint tokens
 - [ ] [Anchor](./apps/auction/anchor)
 - [ ] [Native](./apps/auction/native)
 
@@ -111,6 +126,8 @@
 # Resources
 
 - [Solana docs](https://solana.com/docs)
+- [Solana program](https://www.solana-program.com/)
+- [GitHub - Solana program](https://github.com/solana-program)
 - [GitHub - Anchor](https://github.com/solana-foundation/anchor)
 - [Anchor doc](https://www.anchor-lang.com/docs)
 - [GitHub - solana-developers/program-examples](https://github.com/solana-developers/program-examples)
