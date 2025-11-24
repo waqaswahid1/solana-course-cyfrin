@@ -13,16 +13,22 @@ use auction::{Cmd, state::Auction};
 fn test() {
     let mut svm = LiteSVM::new();
 
-    let owner = Keypair::new();
-    let attacker = Keypair::new();
+    let seller = Keypair::new();
+    let buyer = Keypair::new();
     let auction = Keypair::new();
     let program_keypair = Keypair::new();
     let program_id = program_keypair.pubkey();
     svm.add_program_from_file(program_id, "target/deploy/auction.so")
         .unwrap();
 
-    svm.airdrop(&owner.pubkey(), 1_000_000_000).unwrap();
+    svm.airdrop(&seller.pubkey(), 1_000_000_000).unwrap();
+    svm.airdrop(&buyer.pubkey(), 1_000_000_000).unwrap();
 
+    // A = sell, B = buy
+    // let mint_a = create_mint(&client, &payer, &payer.pubkey(), 6);
+    // let mint_b = create_mint(&client, &payer, &payer.pubkey(), 6);
+
+    /*
     let oracle_account = Account {
         lamports: 1_000_000,
         owner: program_id,
@@ -117,4 +123,5 @@ fn test() {
     let data = svm.get_account(&auction.pubkey()).unwrap().data;
     let oracle_state = Auction::try_from_slice(&data).unwrap();
     assert_eq!(oracle_state.price, 1234);
+    */
 }

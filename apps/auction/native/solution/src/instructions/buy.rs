@@ -91,7 +91,7 @@ pub fn buy(
     let buy_amt = sell_amt * price / (1e6 as u64);
 
     // Send buy token to seller
-    transfer(token_program, buyer, seller, buyer, buy_amt)?;
+    transfer(token_program, buyer_buy_ata, seller_buy_ata, buyer, buy_amt)?;
 
     // Send sell token to buyer
     let seeds = &[
@@ -105,7 +105,7 @@ pub fn buy(
     transfer_from_pda(
         token_program,
         auction_sell_ata,
-        buyer,
+        buyer_sell_ata,
         auction_pda,
         sell_amt,
         seeds,
