@@ -1,8 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token,
-    token::{MintTo, Token, Transfer},
     token_interface::{Mint, TokenAccount, TokenInterface},
 };
 
@@ -103,12 +101,11 @@ pub fn add_liquidity(
         .unwrap();
     let supply = ctx.accounts.mint_pool.supply;
 
-    let mut shares = 0;
-    if pool_liquidity > 0 {
-        shares = user_liquidity.checked_mul(supply).unwrap() / pool_liquidity;
+    let shares = if pool_liquidity > 0 {
+        user_liquidity.checked_mul(supply).unwrap() / pool_liquidity
     } else {
-        shares = user_liquidity;
-    }
+        user_liquidity
+    };
 
     if amount_a > 0 {
         lib::transfer(

@@ -13,7 +13,7 @@ pub mod amm {
     use super::*;
 
     pub fn init_pool(ctx: Context<InitPool>, fee: u16) -> Result<()> {
-        // instructions::init_pool(ctx, fee)?;
+        instructions::init_pool(ctx, fee)?;
         Ok(())
     }
 
@@ -23,7 +23,7 @@ pub mod amm {
         amount_a: u64,
         amount_b: u64,
     ) -> Result<()> {
-        // instructions::add_liquidity(ctx, fee, amount_a, amount_b)?;
+        instructions::add_liquidity(ctx, fee, amount_a, amount_b)?;
         Ok(())
     }
 
@@ -34,7 +34,6 @@ pub mod amm {
         min_amount_a: u64,
         min_amount_b: u64,
     ) -> Result<()> {
-        /*
         instructions::remove_liquidity(
             ctx,
             fee,
@@ -42,7 +41,6 @@ pub mod amm {
             min_amount_a,
             min_amount_b,
         )?;
-        */
         Ok(())
     }
 
@@ -53,7 +51,7 @@ pub mod amm {
         amount_in: u64,
         min_amount_out: u64,
     ) -> Result<()> {
-        // instructions::swap(ctx, fee, a_for_b, amount_in, min_amount_out)?;
+        instructions::swap(ctx, fee, a_for_b, amount_in, min_amount_out)?;
         Ok(())
     }
 }

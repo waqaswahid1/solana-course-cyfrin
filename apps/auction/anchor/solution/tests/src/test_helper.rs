@@ -6,7 +6,6 @@ use anchor_client::{
     },
     Client, Cluster, Program,
 };
-use anchor_spl::associated_token::spl_associated_token_account;
 use anchor_spl::token::{self};
 
 use super::token_helper;
