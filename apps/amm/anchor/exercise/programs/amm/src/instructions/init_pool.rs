@@ -69,17 +69,10 @@ pub struct InitPool<'info> {
 
 pub fn init_pool(ctx: Context<InitPool>, fee: u16) -> Result<()> {
     // Check fee <= constants::MAX_POOL_FEE
-    require!(fee <= constants::MAX_POOL_FEE, error::Error::InvalidFee);
+
     // Check mint_a.decimals == mint_b.decimals
-    require!(
-        ctx.accounts.mint_a.decimals == ctx.accounts.mint_b.decimals,
-        error::Error::DecimalsMismatch
-    );
 
     // Store Pool state
-    let pool = &mut ctx.accounts.pool;
-    pool.mint_a = ctx.accounts.mint_a.key();
-    pool.mint_b = ctx.accounts.mint_b.key();
 
     Ok(())
 }

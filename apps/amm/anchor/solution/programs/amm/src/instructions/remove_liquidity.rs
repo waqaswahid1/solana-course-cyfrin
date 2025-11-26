@@ -91,6 +91,8 @@ pub fn remove_liquidity(
     min_amount_b: u64,
 ) -> Result<()> {
     /*
+    Calculate the amount of token a and b to withdraw
+
     shares / supply = (amount_a + amount_b) / (pool_a + pool_b)
     amount_a = shares / supply * pool_a_amount
     amount_b = shares / supply * pool_b_amount
@@ -106,12 +108,15 @@ pub fn remove_liquidity(
         .checked_div(ctx.accounts.mint_pool.supply)
         .unwrap();
 
+    // Check amount_a >= min_amount_a
+    // Check amount_b >= min_amount_b
     require!(amount_a >= min_amount_a, error::Error::MinAmountOut);
     require!(amount_b >= min_amount_b, error::Error::MinAmountOut);
 
     // NOTE: No withdraw fee
     // payer can call add_liquidity + remove_liquidity to swap tokens without paying swap fee
 
+    // Burn user's shares
     lib::burn(
         &ctx.accounts.token_program,
         &ctx.accounts.mint_pool,
@@ -120,6 +125,7 @@ pub fn remove_liquidity(
         shares,
     )?;
 
+    // Transfer amount_a from pool to payer_a (user's associated token account for token a)
     let pool_bump = ctx.bumps.pool;
     let seeds = &[
         constants::POOL_AUTH_SEED_PREFIX,
@@ -140,6 +146,7 @@ pub fn remove_liquidity(
         )?;
     }
 
+    // Transfer amount_a from pool to payer_b (user's associated token account for token b)
     if amount_b > 0 {
         lib::transfer_from_pool(
             &ctx.accounts.token_program,

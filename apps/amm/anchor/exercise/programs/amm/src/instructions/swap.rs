@@ -73,38 +73,10 @@ pub fn swap(
 ) -> Result<()> {
     // Calculate amount out with fee
     // amount_out = amount_in * (1 - fee)
-    let mut amount_out = amount_in;
-    let amount_out_fee = amount_out.checked_mul(fee as u64).unwrap()
-        / (constants::MAX_POOL_FEE as u64);
-    amount_out -= amount_out_fee;
 
     // Check amount_out >= min_amount_out
-    require!(amount_out >= min_amount_out, error::Error::MinAmountOut);
-
-    let (pool_in, pool_out, payer_in, payer_out) = if a_for_b {
-        (
-            &ctx.accounts.pool_a,
-            &ctx.accounts.pool_b,
-            &ctx.accounts.payer_a,
-            &ctx.accounts.payer_b,
-        )
-    } else {
-        (
-            &ctx.accounts.pool_b,
-            &ctx.accounts.pool_a,
-            &ctx.accounts.payer_b,
-            &ctx.accounts.payer_a,
-        )
-    };
 
     // Transfer token in from user to pool
-    lib::transfer(
-        &ctx.accounts.token_program,
-        payer_in,
-        pool_in,
-        &ctx.accounts.payer,
-        amount_in,
-    )?;
 
     // Transfer token out from pool to user
     let pool_bump = ctx.bumps.pool;
@@ -115,15 +87,6 @@ pub fn swap(
         &fee.to_le_bytes(),
         &[pool_bump],
     ];
-
-    lib::transfer_from_pool(
-        &ctx.accounts.token_program,
-        pool_out,
-        payer_out,
-        &ctx.accounts.pool,
-        amount_out,
-        seeds,
-    )?;
 
     Ok(())
 }

@@ -11,7 +11,7 @@ use crate::state::Pool;
 
 #[derive(Accounts)]
 #[instruction(fee: u16)]
-pub struct Swap<'info> {
+pub struct RemoveLiquidity<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
 
@@ -47,6 +47,18 @@ pub struct Swap<'info> {
 
     #[account(
         mut,
+        seeds = [
+            constants::POOL_MINT_SEED_PREFIX,
+            mint_a.key().as_ref(),
+            mint_b.key().as_ref(),
+            fee.to_le_bytes().as_ref(),
+        ],
+        bump,
+    )]
+    pub mint_pool: InterfaceAccount<'info, Mint>,
+
+    #[account(
+        mut,
         associated_token::mint = mint_a,
         associated_token::authority = payer,
     )]
@@ -59,54 +71,42 @@ pub struct Swap<'info> {
     )]
     pub payer_b: InterfaceAccount<'info, TokenAccount>,
 
+    #[account(
+        mut,
+        associated_token::mint = mint_pool,
+        associated_token::authority = payer,
+    )]
+    pub payer_liquidity: InterfaceAccount<'info, TokenAccount>,
+
     pub token_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }
 
-pub fn swap(
-    ctx: Context<Swap>,
+pub fn remove_liquidity(
+    ctx: Context<RemoveLiquidity>,
     fee: u16,
-    a_for_b: bool,
-    amount_in: u64,
-    min_amount_out: u64,
+    shares: u64,
+    min_amount_a: u64,
+    min_amount_b: u64,
 ) -> Result<()> {
-    // Calculate amount out with fee
-    // amount_out = amount_in * (1 - fee)
-    let mut amount_out = amount_in;
-    let amount_out_fee = amount_out.checked_mul(fee as u64).unwrap()
-        / (constants::MAX_POOL_FEE as u64);
-    amount_out -= amount_out_fee;
+    /*
+    Calculate the amount of token a and b to withdraw
 
-    // Check amount_out >= min_amount_out
-    require!(amount_out >= min_amount_out, error::Error::MinAmountOut);
+    shares / supply = (amount_a + amount_b) / (pool_a + pool_b)
+    amount_a = shares / supply * pool_a_amount
+    amount_b = shares / supply * pool_b_amount
+    */
 
-    let (pool_in, pool_out, payer_in, payer_out) = if a_for_b {
-        (
-            &ctx.accounts.pool_a,
-            &ctx.accounts.pool_b,
-            &ctx.accounts.payer_a,
-            &ctx.accounts.payer_b,
-        )
-    } else {
-        (
-            &ctx.accounts.pool_b,
-            &ctx.accounts.pool_a,
-            &ctx.accounts.payer_b,
-            &ctx.accounts.payer_a,
-        )
-    };
+    // Check amount_a >= min_amount_a
+    // Check amount_b >= min_amount_b
 
-    // Transfer token in from user to pool
-    lib::transfer(
-        &ctx.accounts.token_program,
-        payer_in,
-        pool_in,
-        &ctx.accounts.payer,
-        amount_in,
-    )?;
+    // NOTE: No withdraw fee
+    // payer can call add_liquidity + remove_liquidity to swap tokens without paying swap fee
 
-    // Transfer token out from pool to user
+    // Burn user's shares
+
+    // Transfer amount_a from pool to payer_a (user's associated token account for token a)
     let pool_bump = ctx.bumps.pool;
     let seeds = &[
         constants::POOL_AUTH_SEED_PREFIX,
@@ -116,14 +116,7 @@ pub fn swap(
         &[pool_bump],
     ];
 
-    lib::transfer_from_pool(
-        &ctx.accounts.token_program,
-        pool_out,
-        payer_out,
-        &ctx.accounts.pool,
-        amount_out,
-        seeds,
-    )?;
+    // Transfer amount_a from pool to payer_b (user's associated token account for token b)
 
     Ok(())
 }

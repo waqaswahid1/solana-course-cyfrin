@@ -90,7 +90,9 @@ pub fn add_liquidity(
     amount_b: u64,
 ) -> Result<()> {
     /*
-    shares = user_liquidity / pool_liquidity * supply
+    Calculate user shares to mint
+    user shares = user_liquidity / pool_liquidity * supply
+    user_liquidity = amount_a + amount_b
     */
     let user_liquidity = amount_a.checked_add(amount_b).unwrap();
     let pool_liquidity = ctx
@@ -107,6 +109,7 @@ pub fn add_liquidity(
         user_liquidity
     };
 
+    // Transfer amount_a from user into pool_a
     if amount_a > 0 {
         lib::transfer(
             &ctx.accounts.token_program,
@@ -117,6 +120,7 @@ pub fn add_liquidity(
         )?;
     }
 
+    // Transfer amount_b from user into pool_b
     if amount_b > 0 {
         lib::transfer(
             &ctx.accounts.token_program,
@@ -127,6 +131,7 @@ pub fn add_liquidity(
         )?;
     }
 
+    // Mint shares to user's associated token account (payer_liquidity)
     if shares > 0 {
         let pool_bump = ctx.bumps.pool;
         let seeds = &[
