@@ -14,12 +14,9 @@ use std::str::FromStr;
 use std::thread;
 use std::time::Duration;
 
-// use auction::Cmd;
-// use auction::state::Auction;
+use amm::Cmd;
+use amm::state::Pool;
 
-fn main() {}
-
-/*
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
@@ -34,368 +31,195 @@ fn main() {
 
     let program_id = Pubkey::from_str(&args[3]).expect("Invalid program ID");
 
-    let seller = Keypair::new();
-    let buyer = Keypair::new();
+    let users = vec![Keypair::new(), Keypair::new()];
 
     airdrop(&client, &payer.pubkey(), 1e9 as u64);
-    airdrop(&client, &seller.pubkey(), 1e9 as u64);
-    airdrop(&client, &buyer.pubkey(), 1e9 as u64);
+    for user in users.iter() {
+        airdrop(&client, &user.pubkey(), 1e9 as u64);
+    }
 
-    let mint_sell = create_mint(&client, &payer, &payer.pubkey(), 6);
-    let mint_buy = create_mint(&client, &payer, &payer.pubkey(), 6);
+    // Mints
+    let mint_a = create_mint(&client, &payer, &payer.pubkey(), 6);
+    let mint_b = create_mint(&client, &payer, &payer.pubkey(), 6);
 
-    // Create token accounts for users
-    let seller_sell_ata =
-        create_ata(&client, &payer, &seller.pubkey(), &mint_sell);
-    let seller_buy_ata =
-        create_ata(&client, &payer, &seller.pubkey(), &mint_buy);
-    let buyer_sell_ata =
-        create_ata(&client, &payer, &buyer.pubkey(), &mint_sell);
-    let buyer_buy_ata = create_ata(&client, &payer, &buyer.pubkey(), &mint_buy);
-
-    // Mint tokens to users
-    mint_to(&client, &payer, &mint_sell, &seller_sell_ata, 1e9 as u64);
-    mint_to(&client, &payer, &mint_buy, &buyer_buy_ata, 1e9 as u64);
-
-    // Derive PDAs
-    let (auction_pda, bump) = Pubkey::find_program_address(
+    // Pool PDA
+    let fee: u16 = 500;
+    let (pool_pda, pool_bump) = Pubkey::find_program_address(
         &[
-            Auction::SEED_PREFIX,
-            seller.pubkey().as_ref(),
-            mint_sell.as_ref(),
-            mint_buy.as_ref(),
+            amm::constants::POOL_AUTH,
+            mint_a.as_ref(),
+            mint_b.as_ref(),
+            fee.to_le_bytes().as_ref(),
         ],
         &program_id,
     );
 
-    let auction_sell_ata = get_ata(&auction_pda, &mint_sell);
-
-    // Init
-    println!("Init");
-
-    let now = client.get_block_time(client.get_slot().unwrap()).unwrap() as u64;
-    let start_price: u64 = (2.0 * 1e6) as u64;
-    let end_price: u64 = (1.5 * 1e6) as u64;
-    let start_time: u64 = now + 1;
-    let end_time: u64 = start_time + 10;
-    let sell_amt: u64 = 1e8 as u64;
-
-    let ix = create_init_ix(
-        program_id,
-        start_price,
-        end_price,
-        start_time,
-        end_time,
-        sell_amt,
-        bump,
-        seller.pubkey(),
-        mint_sell,
-        mint_buy,
-        auction_pda,
-        auction_sell_ata,
-        seller_sell_ata,
-    );
-
-    let mut tx = Transaction::new_with_payer(&[ix], Some(&seller.pubkey()));
-    let blockhash = client.get_latest_blockhash().unwrap();
-    tx.sign(&[&seller], blockhash);
-
-    let res = client.send_and_confirm_transaction(&tx);
-    res.unwrap();
-
-    // TODO: check state
-    /*
-    let data = client
-        .get_account_data(&pda)
-        .expect("Failed to fetch account data");
-
-    let lock = Lock::try_from_slice(&data).expect("Failed to deserialize");
-
-    println!("lock.dst: {:?}", lock.dst);
-    println!("lock.exp: {:?}", lock.exp);
-    println!("locked amt: {:?}", client.get_balance(&pda));
-    */
-    let auction_sell_bal = get_token_balance(&client, &auction_sell_ata);
-    println!("Auction sell ATA balance: {:?}", auction_sell_bal);
-
-    assert_eq!(auction_sell_bal, sell_amt, "Auction sell ATA balance");
-
-    // Buy
-    println!("Buy");
-    thread::sleep(Duration::from_millis(1500));
-
-    let cmd = Cmd::Buy {
-        max_price: start_price - 1,
-        bump,
-    };
-
-    let ix = Instruction::new_with_borsh(
-        program_id,
-        &cmd,
-        vec![
-            AccountMeta {
-                pubkey: buyer.pubkey(),
-                is_signer: true,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: seller.pubkey(),
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: mint_sell,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: mint_buy,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: auction_pda,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: auction_sell_ata,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: buyer_sell_ata,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: buyer_buy_ata,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: seller_buy_ata,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: Pubkey::from(spl_token_interface::ID.to_bytes()),
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: solana_sdk::system_program::id(),
-                is_signer: false,
-                is_writable: true,
-            },
+    let (mint_pool_pda, mint_pool_bump) = Pubkey::find_program_address(
+        &[
+            amm::constants::POOL_MINT,
+            mint_a.as_ref(),
+            mint_b.as_ref(),
+            fee.to_le_bytes().as_ref(),
         ],
+        &program_id,
     );
 
-    let mut tx = Transaction::new_with_payer(&[ix], Some(&buyer.pubkey()));
+    // ATA
+    let mut atas_a = Vec::new();
+    let mut atas_b = Vec::new();
+    for user in users.iter() {
+        let ata_a = create_ata(&client, &payer, &user.pubkey(), &mint_a);
+        atas_a.push(ata_a);
+
+        let ata_b = create_ata(&client, &payer, &user.pubkey(), &mint_b);
+        atas_b.push(ata_b);
+
+        mint_to(&client, &payer, &mint_a, &ata_a, 1e9 as u64);
+        mint_to(&client, &payer, &mint_b, &ata_b, 1e9 as u64);
+    }
+
+    let pool_a = get_ata(&mint_a, &pool_pda);
+    let pool_b = get_ata(&mint_b, &pool_pda);
+
+    let mut atas_liq = Vec::new();
+    for user in users.iter() {
+        atas_liq.push(get_ata(&mint_pool_pda, &user.pubkey()));
+    }
+
+    // Init pool
+    println!("--- Init pool ---");
+
+    let fee: u16 = 500;
+
+    let ix = create_init_pool_ix(
+        program_id,
+        payer.pubkey(),
+        fee,
+        mint_a,
+        mint_b,
+        pool_pda,
+        pool_bump,
+        mint_pool_pda,
+        mint_pool_bump,
+        pool_a,
+        pool_b,
+    );
+
+    let mut tx = Transaction::new_with_payer(&[ix], Some(&payer.pubkey()));
     let blockhash = client.get_latest_blockhash().unwrap();
-    tx.sign(&[&buyer], blockhash);
+    tx.sign(&[&payer], blockhash);
 
     let res = client.send_and_confirm_transaction(&tx);
     res.unwrap();
 
-    let buyer_buy_ata_bal = get_token_balance(&client, &buyer_buy_ata);
-    let buyer_sell_ata_bal = get_token_balance(&client, &buyer_sell_ata);
-    println!("Buyer buy ATA balance: {:?}", buyer_buy_ata_bal);
-    println!("Buyer sell ATA balance: {:?}", buyer_sell_ata_bal);
+    // Add liquidity
+    println!("--- Add liquidity ---");
+    let amt_a = (10.0 * 1e6) as u64;
+    let amt_b = (10.0 * 1e6) as u64;
 
-    let seller_buy_ata_bal = get_token_balance(&client, &seller_buy_ata);
-    let seller_sell_ata_bal = get_token_balance(&client, &seller_sell_ata);
-    println!("Seller buy ATA balance: {:?}", seller_buy_ata_bal);
-    println!("Seller sell ATA balance: {:?}", seller_sell_ata_bal);
-
-    assert_eq!(buyer_sell_ata_bal, sell_amt, "Buyer sell ATA balance");
-    assert!(seller_buy_ata_bal > 0, "Seller buy ATA balance");
-
-    // Create auction
-    println!("Init");
-    let now = client.get_block_time(client.get_slot().unwrap()).unwrap() as u64;
-    let start_price: u64 = (2.0 * 1e6) as u64;
-    let end_price: u64 = (1.5 * 1e6) as u64;
-    let start_time: u64 = now + 1;
-    let end_time: u64 = start_time + 10;
-    let sell_amt: u64 = 1e8 as u64;
-
-    let ix = create_init_ix(
+    let ix = create_add_liquidity_ix(
         program_id,
-        start_price,
-        end_price,
-        start_time,
-        end_time,
-        sell_amt,
-        bump,
-        seller.pubkey(),
-        mint_sell,
-        mint_buy,
-        auction_pda,
-        auction_sell_ata,
-        seller_sell_ata,
+        users[0].pubkey(),
+        fee,
+        mint_a,
+        mint_b,
+        pool_pda,
+        pool_bump,
+        mint_pool_pda,
+        mint_pool_bump,
+        pool_a,
+        pool_b,
+        amt_a,
+        amt_b,
+        atas_a[0],
+        atas_b[0],
+        atas_liq[0],
     );
 
-    let mut tx = Transaction::new_with_payer(&[ix], Some(&seller.pubkey()));
+    let mut tx = Transaction::new_with_payer(&[ix], Some(&users[0].pubkey()));
     let blockhash = client.get_latest_blockhash().unwrap();
-    tx.sign(&[&seller], blockhash);
+    tx.sign(&[&users[0]], blockhash);
 
     let res = client.send_and_confirm_transaction(&tx);
     res.unwrap();
 
-    // Cancel
-    println!("Cancel");
-    let cmd = Cmd::Cancel { bump };
+    println!("Pool A: {:?}", get_token_balance(&client, &pool_a));
+    println!("Pool B: {:?}", get_token_balance(&client, &pool_b));
 
-    let ix = Instruction::new_with_borsh(
+    // SwaV
+    println!("--- Swap ---");
+
+    let a_for_b = true;
+    let amt_in = 1e6 as u64;
+    let min_amt_out = (0.95 * 1e6) as u64;
+
+    let ix = create_swap_ix(
         program_id,
-        &cmd,
-        vec![
-            AccountMeta {
-                pubkey: seller.pubkey(),
-                is_signer: true,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: mint_sell,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: mint_buy,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: auction_pda,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: auction_sell_ata,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: seller_sell_ata,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: Pubkey::from(spl_token_interface::ID.to_bytes()),
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: solana_sdk::system_program::id(),
-                is_signer: false,
-                is_writable: true,
-            },
-        ],
+        users[1].pubkey(),
+        fee,
+        mint_a,
+        mint_b,
+        pool_pda,
+        pool_bump,
+        pool_a,
+        pool_b,
+        atas_a[1],
+        atas_b[1],
+        a_for_b,
+        amt_in,
+        min_amt_out,
     );
 
-    let seller_sell_ata_bal_before =
-        get_token_balance(&client, &seller_sell_ata);
-
-    let mut tx = Transaction::new_with_payer(&[ix], Some(&seller.pubkey()));
+    let mut tx = Transaction::new_with_payer(&[ix], Some(&users[1].pubkey()));
     let blockhash = client.get_latest_blockhash().unwrap();
-    tx.sign(&[&seller], blockhash);
+    tx.sign(&[&users[1]], blockhash);
 
     let res = client.send_and_confirm_transaction(&tx);
     res.unwrap();
 
-    let seller_sell_ata_bal = get_token_balance(&client, &seller_sell_ata);
-    println!("Seller sell ATA balance: {:?}", seller_sell_ata_bal);
-    assert_eq!(
-        seller_sell_ata_bal,
-        seller_sell_ata_bal_before + sell_amt,
-        "Seller sell ATA balance"
-    );
-}
+    println!("User 1 A: {:?}", get_token_balance(&client, &atas_a[1]));
+    println!("User 1 B: {:?}", get_token_balance(&client, &atas_b[1]));
+    println!("Pool A: {:?}", get_token_balance(&client, &pool_a));
+    println!("Pool B: {:?}", get_token_balance(&client, &pool_b));
 
-fn create_init_ix(
-    program_id: Pubkey,
-    start_price: u64,
-    end_price: u64,
-    start_time: u64,
-    end_time: u64,
-    sell_amt: u64,
-    bump: u8,
-    seller: Pubkey,
-    mint_sell: Pubkey,
-    mint_buy: Pubkey,
-    auction_pda: Pubkey,
-    auction_sell_ata: Pubkey,
-    seller_sell_ata: Pubkey,
-) -> Instruction {
-    let cmd = Cmd::Init {
-        start_price,
-        end_price,
-        start_time,
-        end_time,
-        sell_amt,
-        bump,
-    };
+    // Remove liquidity
+    println!("--- Remove liquidity ---");
 
-    Instruction::new_with_borsh(
+    let shares = amt_a + amt_b;
+    let min_amt_a = 1;
+    let min_amt_b = 1;
+
+    let ix = create_remove_liquidity_ix(
         program_id,
-        &cmd,
-        vec![
-            AccountMeta {
-                pubkey: seller,
-                is_signer: true,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: mint_sell,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: mint_buy,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: auction_pda,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: auction_sell_ata,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: seller_sell_ata,
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: Pubkey::from(spl_token_interface::ID.to_bytes()),
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: Pubkey::from(
-                    spl_associated_token_account_interface::program::ID
-                        .to_bytes(),
-                ),
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: solana_sdk::system_program::id(),
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
-                pubkey: solana_sdk::sysvar::rent::id(),
-                is_signer: false,
-                is_writable: true,
-            },
-        ],
-    )
+        users[0].pubkey(),
+        fee,
+        mint_a,
+        mint_b,
+        pool_pda,
+        pool_bump,
+        mint_pool_pda,
+        mint_pool_bump,
+        pool_a,
+        pool_b,
+        shares,
+        min_amt_a,
+        min_amt_b,
+        atas_a[0],
+        atas_b[0],
+        atas_liq[0],
+    );
+
+    let mut tx = Transaction::new_with_payer(&[ix], Some(&users[0].pubkey()));
+    let blockhash = client.get_latest_blockhash().unwrap();
+    tx.sign(&[&users[0]], blockhash);
+
+    let res = client.send_and_confirm_transaction(&tx);
+    res.unwrap();
+
+    println!("User 0 A: {:?}", get_token_balance(&client, &atas_a[0]));
+    println!("User 0 B: {:?}", get_token_balance(&client, &atas_b[0]));
+    println!("Pool A: {:?}", get_token_balance(&client, &pool_a));
+    println!("Pool B: {:?}", get_token_balance(&client, &pool_b));
 }
 
 fn airdrop(client: &RpcClient, pubkey: &Pubkey, lamports: u64) {
@@ -415,7 +239,7 @@ fn airdrop(client: &RpcClient, pubkey: &Pubkey, lamports: u64) {
 fn create_mint(
     client: &RpcClient,
     payer: &Keypair,
-    authority: &Pubkey,
+    auth: &Pubkey,
     decimals: u8,
 ) -> Pubkey {
     let mint = Keypair::new();
@@ -436,7 +260,7 @@ fn create_mint(
     let init_ix = spl_token_interface::instruction::initialize_mint(
         &Address::from(spl_token_interface::ID.to_bytes()),
         &Address::from(mint.pubkey().to_bytes()),
-        &Address::from(authority.to_bytes()),
+        &Address::from(auth.to_bytes()),
         None,
         decimals,
     )
@@ -468,7 +292,7 @@ fn create_mint(
     mint.pubkey()
 }
 
-fn get_ata(owner: &Pubkey, mint: &Pubkey) -> Pubkey {
+fn get_ata(mint: &Pubkey, owner: &Pubkey) -> Pubkey {
     let ata_addr = spl_associated_token_account_interface::address::get_associated_token_address(
         &Address::from(owner.to_bytes()),
         &Address::from(mint.to_bytes()),
@@ -482,7 +306,7 @@ fn create_ata(
     owner: &Pubkey,
     mint: &Pubkey,
 ) -> Pubkey {
-    let ata = get_ata(owner, mint);
+    let ata = get_ata(mint, owner);
 
     if client.get_account(&ata).is_ok() {
         return ata;
@@ -524,16 +348,16 @@ fn mint_to(
     client: &RpcClient,
     payer: &Keypair,
     mint: &Pubkey,
-    dest: &Pubkey,
-    amount: u64,
+    dst: &Pubkey,
+    amt: u64,
 ) {
     let mint_ix = spl_token_interface::instruction::mint_to(
         &Address::from(spl_token_interface::ID.to_bytes()),
         &Address::from(mint.to_bytes()),
-        &Address::from(dest.to_bytes()),
+        &Address::from(dst.to_bytes()),
         &Address::from(payer.pubkey().to_bytes()),
         &[],
-        amount,
+        amt,
     )
     .unwrap();
 
@@ -562,6 +386,364 @@ fn get_token_balance(client: &RpcClient, token_account: &Pubkey) -> u64 {
     let data = client.get_account_data(token_account).unwrap();
     let account = spl_token_interface::state::Account::unpack(&data).unwrap();
     account.amount
-
 }
-*/
+
+fn create_init_pool_ix(
+    program_id: Pubkey,
+    payer: Pubkey,
+    fee: u16,
+    mint_a: Pubkey,
+    mint_b: Pubkey,
+    pool: Pubkey,
+    pool_bump: u8,
+    mint_pool: Pubkey,
+    mint_pool_bump: u8,
+    pool_a: Pubkey,
+    pool_b: Pubkey,
+) -> Instruction {
+    let cmd = Cmd::InitPool {
+        fee,
+        pool_bump,
+        mint_pool_bump,
+    };
+
+    Instruction::new_with_borsh(
+        program_id,
+        &cmd,
+        vec![
+            AccountMeta {
+                pubkey: payer,
+                is_signer: true,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: pool,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: mint_a,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: mint_b,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: pool_a,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: pool_b,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: mint_pool,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: Pubkey::from(spl_token_interface::ID.to_bytes()),
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: Pubkey::from(
+                    spl_associated_token_account_interface::program::ID
+                        .to_bytes(),
+                ),
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: solana_sdk::system_program::id(),
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: solana_sdk::sysvar::rent::id(),
+                is_signer: false,
+                is_writable: true,
+            },
+        ],
+    )
+}
+
+fn create_add_liquidity_ix(
+    program_id: Pubkey,
+    payer: Pubkey,
+    fee: u16,
+    mint_a: Pubkey,
+    mint_b: Pubkey,
+    pool: Pubkey,
+    pool_bump: u8,
+    mint_pool: Pubkey,
+    mint_pool_bump: u8,
+    pool_a: Pubkey,
+    pool_b: Pubkey,
+    amount_a: u64,
+    amount_b: u64,
+    payer_a: Pubkey,
+    payer_b: Pubkey,
+    payer_liq: Pubkey,
+) -> Instruction {
+    let cmd = Cmd::AddLiquidity {
+        fee,
+        pool_bump,
+        mint_pool_bump,
+        amount_a,
+        amount_b,
+    };
+
+    Instruction::new_with_borsh(
+        program_id,
+        &cmd,
+        vec![
+            AccountMeta {
+                pubkey: payer,
+                is_signer: true,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: pool,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: mint_a,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: mint_b,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: pool_a,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: pool_b,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: mint_pool,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: payer_a,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: payer_b,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: payer_liq,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: Pubkey::from(spl_token_interface::ID.to_bytes()),
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: Pubkey::from(
+                    spl_associated_token_account_interface::program::ID
+                        .to_bytes(),
+                ),
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: solana_sdk::system_program::id(),
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: solana_sdk::sysvar::rent::id(),
+                is_signer: false,
+                is_writable: true,
+            },
+        ],
+    )
+}
+
+fn create_remove_liquidity_ix(
+    program_id: Pubkey,
+    payer: Pubkey,
+    fee: u16,
+    mint_a: Pubkey,
+    mint_b: Pubkey,
+    pool: Pubkey,
+    pool_bump: u8,
+    mint_pool: Pubkey,
+    mint_pool_bump: u8,
+    pool_a: Pubkey,
+    pool_b: Pubkey,
+    shares: u64,
+    min_amount_a: u64,
+    min_amount_b: u64,
+    payer_a: Pubkey,
+    payer_b: Pubkey,
+    payer_liq: Pubkey,
+) -> Instruction {
+    let cmd = Cmd::RemoveLiquidity {
+        fee,
+        pool_bump,
+        mint_pool_bump,
+        shares,
+        min_amount_a,
+        min_amount_b,
+    };
+
+    Instruction::new_with_borsh(
+        program_id,
+        &cmd,
+        vec![
+            AccountMeta {
+                pubkey: payer,
+                is_signer: true,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: pool,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: mint_a,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: mint_b,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: pool_a,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: pool_b,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: mint_pool,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: payer_a,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: payer_b,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: payer_liq,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: Pubkey::from(spl_token_interface::ID.to_bytes()),
+                is_signer: false,
+                is_writable: true,
+            },
+        ],
+    )
+}
+
+fn create_swap_ix(
+    program_id: Pubkey,
+    payer: Pubkey,
+    fee: u16,
+    mint_a: Pubkey,
+    mint_b: Pubkey,
+    pool: Pubkey,
+    pool_bump: u8,
+    pool_a: Pubkey,
+    pool_b: Pubkey,
+    payer_a: Pubkey,
+    payer_b: Pubkey,
+    a_for_b: bool,
+    amount_in: u64,
+    min_amount_out: u64,
+) -> Instruction {
+    let cmd = Cmd::Swap {
+        fee,
+        pool_bump,
+        a_for_b,
+        amount_in,
+        min_amount_out,
+    };
+
+    Instruction::new_with_borsh(
+        program_id,
+        &cmd,
+        vec![
+            AccountMeta {
+                pubkey: payer,
+                is_signer: true,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: pool,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: mint_a,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: mint_b,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: pool_a,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: pool_b,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: payer_a,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: payer_b,
+                is_signer: false,
+                is_writable: true,
+            },
+            AccountMeta {
+                pubkey: Pubkey::from(spl_token_interface::ID.to_bytes()),
+                is_signer: false,
+                is_writable: true,
+            },
+        ],
+    )
+}
