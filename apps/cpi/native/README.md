@@ -47,6 +47,21 @@ invoke(
 # Task 2 - Implement [`inc`](https://github.com/Cyfrin/solana-course/blob/main/apps/cpi/native/exercise/programs/factory/src/lib.rs)
 - Invoke `Inc` on the `counter` program
 
+```rust
+let cmd = counter::Cmd::Inc;
+let ix = Instruction::new_with_borsh(
+    *counter_program.key,
+    &cmd,
+    vec![AccountMeta {
+        pubkey: *counter_account.key,
+        is_signer: false,
+        is_writable: true,
+    }],
+);
+
+invoke(&ix, &[counter_account.clone()])?;
+```
+
 # Build
 
 ```shell
