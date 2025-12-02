@@ -126,6 +126,14 @@
     - No auto generated IDL
 
 # Wormhole
+    - Overview
+        - Guardian network, consensus model
+        - VAA and message relaying
+    - NTT
+        - Overview (SPL to ETH ERC20)
+        - CLI setup
+        - Token transfer demo
+    - Deploy AMM + swap using NTT
 
 # Resources
 
