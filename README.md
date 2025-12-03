@@ -27,7 +27,7 @@
         - Anchor tests in Rust are unreliable
 
 # Core concepts
-- Solana vs Ethereum
+- [Solana vs Ethereum](./notes/eth-sol.png)
 - Accounts
     - data
     - lamports
