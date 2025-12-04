@@ -27,26 +27,24 @@
         - Anchor tests in Rust are unreliable
 
 # Core concepts
-- [Solana vs Ethereum](./notes/eth-sol.png)
-- [Accounts](./notes/account.png)
+- [ ] [Solana vs Ethereum](./notes/eth-sol.png)
+- [ ] [Accounts](./notes/account.png)
     - data
     - lamports
     - owner
     - Keypair must prove existence of keypair before sending transaction to create account, receive SOL, etc
     - Rent
         - Data must be empty if SOL = 0
-- [Programs, instructions and transactions](./notes/program.png)
-    - program id - how is it derived?
-    - Private key needed for upgrade
-    - Pub key needed for user interaction
-    - BPF loader
-    - System program
-    - Token program
-    - [Limitations](https://solana.com/docs/programs/limitations)
-- PDA (program derived address)
-    - no private key
-- CPI (cross program invocation)
-- IDL
+- [ ] [Programs, instructions and transactions](./notes/program.png)
+    - [ ] program id
+        - how is it derived?
+            - Randomly generated private key typically stored under  `target/deploy/my_program.json`
+            - Private key needed for upgrade
+        - Pub key needed for user interaction
+    - [ ] [Limitations](https://solana.com/docs/programs/limitations)
+- [ ] [PDA](./notes/pda.png)
+- [ ] CPI (cross program invocation)
+- [ ] IDL
 
 # Hello
 - [ ] [Native](./apps/hello/native)
