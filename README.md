@@ -43,8 +43,10 @@
         - Pub key needed for user interaction
     - [ ] [Limitations](https://solana.com/docs/programs/limitations)
 - [ ] [PDA](./notes/pda.png)
-- [ ] CPI (cross program invocation)
-- [ ] IDL
+- [ ] [CPI](https://solana.com/docs/core/cpi)
+    - permissions
+    - 4 depth
+- [ ] [IDL](https://solana.com/developers/guides/advanced/idls)
 
 # Hello
 - [ ] [Native](./apps/hello/native)
@@ -122,14 +124,14 @@
     - No auto generated IDL
 
 # Wormhole
-    - Overview
-        - Guardian network, consensus model
-        - VAA and message relaying
-    - NTT
-        - Overview (SPL to ETH ERC20)
-        - CLI setup
-        - Token transfer demo
-    - Deploy AMM + swap using NTT
+- Overview
+    - Guardian network, consensus model
+    - VAA and message relaying
+- NTT
+    - Overview (SPL to ETH ERC20)
+    - CLI setup
+    - Token transfer demo
+- Deploy AMM + swap using NTT
 
 # Resources
 
