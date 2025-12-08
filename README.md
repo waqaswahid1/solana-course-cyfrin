@@ -129,30 +129,50 @@
     - VAA and message relaying
 - NTT
     - Overview (SPL to ETH ERC20)
-    - CLI setup
+    - CLI setup (NTT 1.6.0)
         - https://wormhole.com/docs/products/token-transfers/native-token-transfers/get-started/
         - ERC20 / SPL
             - [Deploy ERC20](https://sepolia.etherscan.io/address/0x0c3d43954B0b312D591739980E0A157621B581BC)
-            - Deploy SPL
             ```shell
-            solana config set -ud
-            solana balance
-            solana airdrop 1
-
-            cargo install spl-token-cli
-            spl-token --version
-
-            spl-token create-token
-            MINT=...
-
-            spl-token create-account $MINT
-            ATA=...
-
-            spl-token mint $MINT 1000
-
-            https://explorer.solana.com/address/AJA8ApLpXHr9pM2CS85y9g4UgFtXuM71gXU9vGBTmMcB?cluster=devnet
+            export ERC20=...
             ```
-            - Install NTT CLI
+            - Deploy SPL
+                ```shell
+                solana config set -ud
+                solana balance
+                solana airdrop 1
+
+                cargo install spl-token-cli
+                spl-token --version
+
+                spl-token create-token
+                MINT=...
+
+                spl-token create-account $MINT
+                ATA=...
+
+                spl-token mint $MINT 1000
+
+                https://explorer.solana.com/address/AJA8ApLpXHr9pM2CS85y9g4UgFtXuM71gXU9vGBTmMcB?cluster=devnet
+                ```
+
+                ```shell
+                export SPL=...
+                ```
+
+                - Install NTT CLI
+                ```shell
+                ntt --version
+                ```
+                - Init NTT project
+                - Deploy to EVM
+                    ```shell
+                    export ETH_PRIVATE_KEY=
+                    export SEPOLIA_SCAN_API_KEY=
+                    ```
+                - Set rate limits
+                - Set mint authority to NTTManager
+            - Deploy to SVM
     - Token transfer demo
 - Deploy AMM + swap using NTT
 
