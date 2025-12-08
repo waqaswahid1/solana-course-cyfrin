@@ -130,6 +130,29 @@
 - NTT
     - Overview (SPL to ETH ERC20)
     - CLI setup
+        - https://wormhole.com/docs/products/token-transfers/native-token-transfers/get-started/
+        - ERC20 / SPL
+            - [Deploy ERC20](https://sepolia.etherscan.io/address/0x0c3d43954B0b312D591739980E0A157621B581BC)
+            - Deploy SPL
+            ```shell
+            solana config set -ud
+            solana balance
+            solana airdrop 1
+
+            cargo install spl-token-cli
+            spl-token --version
+
+            spl-token create-token
+            MINT=...
+
+            spl-token create-account $MINT
+            ATA=...
+
+            spl-token mint $MINT 1000
+
+            https://explorer.solana.com/address/AJA8ApLpXHr9pM2CS85y9g4UgFtXuM71gXU9vGBTmMcB?cluster=devnet
+            ```
+            - Install NTT CLI
     - Token transfer demo
 - Deploy AMM + swap using NTT
 
@@ -146,3 +169,8 @@
 - [Solana explorer](https://explorer.solana.com/)
 - [crates.io](https://crates.io/)
 - [Solana playground](https://beta.solpg.io/)
+- [GitHub - Wormhole](https://github.com/wormhole-foundation)
+- [GitHub - Wormhole NTT](https://github.com/wormhole-foundation/native-token-transfers)
+- [Wormhole - NTT](https://wormhole.com/docs/products/token-transfers/native-token-transfers/overview/)
+- [Wormhole Advanced Tech Workshop: NTT](https://www.youtube.com/watch?v=ltZmeyjUxRk)
+- [Remix](https://remix.ethereum.org)
