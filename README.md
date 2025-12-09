@@ -154,6 +154,8 @@
                 spl-token mint $MINT 1000
 
                 https://explorer.solana.com/address/AJA8ApLpXHr9pM2CS85y9g4UgFtXuM71gXU9vGBTmMcB?cluster=devnet
+                mint
+                73Rgt8CZCJez89VtJdRd84kfUPVSprS2Sy5V7Skmq1bU
                 ```
 
                 ```shell
@@ -173,6 +175,20 @@
                 - Set rate limits
                 - Set mint authority to NTTManager
             - Deploy to SVM
+                - `solana airdrop 10`
+                - Solana and Anchor version
+                    ```shell
+                    Install latest Solana CLI
+                    sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
+
+                    NTT specific version
+                    sh -c "$(curl -sSfL https://release.anza.xyz/v1.18.26/install)"
+
+                    cargo install --git https://github.com/solana-foundation/anchor --tag v0.29.0 anchor-cli
+
+                    solana --version
+                    anchor --version
+                    ```
     - Token transfer demo
 - Deploy AMM + swap using NTT
 
@@ -180,6 +196,8 @@
 
 - [Solana docs](https://solana.com/docs)
 - [Solana program](https://www.solana-program.com/)
+- [solscan](https://solscan.io/)
+- [Solana faucet](https://faucet.solana.com/)
 - [GitHub - Solana program](https://github.com/solana-program)
 - [GitHub - Anchor](https://github.com/solana-foundation/anchor)
 - [Anchor doc](https://www.anchor-lang.com/docs)
