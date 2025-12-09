@@ -189,6 +189,12 @@
                     solana --version
                     anchor --version
                     ```
+                - Demo with NTT SDK
+                  https://github.com/wormhole-foundation/demo-ntt-ts-sdk
+                  - comment out optional RPC url
+                  - set dst address and amount
+                  - ts-ignore wh
+                  https://wormholescan.io/#/tx/26ZaFXBfHwSzSQL9xEWmGpJheV4kPcSeAQVbTNizaxeo9Cf8Zq5QDDygXGs6roquLRKhaaWYoG6yFnUyxpNw2s1X?network=Testnet
     - Token transfer demo
 - Deploy AMM + swap using NTT
 
@@ -209,6 +215,7 @@
 - [Solana playground](https://beta.solpg.io/)
 - [GitHub - Wormhole](https://github.com/wormhole-foundation)
 - [GitHub - Wormhole NTT](https://github.com/wormhole-foundation/native-token-transfers)
+- [GitHub - Wormhole TypeScript SDK](https://github.com/wormhole-foundation/wormhole-sdk-ts)
 - [Wormhole - NTT](https://wormhole.com/docs/products/token-transfers/native-token-transfers/overview/)
 - [Wormhole Advanced Tech Workshop: NTT](https://www.youtube.com/watch?v=ltZmeyjUxRk)
 - [Remix](https://remix.ethereum.org)
