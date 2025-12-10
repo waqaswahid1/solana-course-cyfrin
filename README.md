@@ -136,7 +136,7 @@
     - Executor
         - ets anyone act as a relayer to take a Wormhole message (a VAA) from one chain and execute it on another
     - [NTT](https://wormhole.com/docs/products/token-transfers/overview/)
-        - Burn & mint, hub and spokes
+        - [Burn & mint, hub and spokes](./notes/wormhole-ntt-modes.png)
 - NTT
     - Overview (SPL to ETH ERC20)
     - CLI setup (NTT 1.6.0)
