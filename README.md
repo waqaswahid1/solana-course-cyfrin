@@ -44,9 +44,9 @@ TODO: clean up
 - [Anchor](./apps/hello/anchor)
 
 # Oracle
-- [ ] [Native](./apps/oracle/native)
+- [Native](./apps/oracle/native)
     - [ ] [State](./notes/state.md)
-- [ ] [Anchor](./apps/oracle/anchor)
+- [Anchor](./apps/oracle/anchor)
 
 # Piggy bank - PDA
 - [Native](./apps/piggy/native)
@@ -64,8 +64,8 @@ TODO: clean up
         - Mint authority
     - Create token account
     - Mint tokens
-- [ ] [Anchor](./apps/auction/anchor)
-- [ ] [Native](./apps/auction/native)
+- [Anchor](./apps/auction/anchor)
+- [Native](./apps/auction/native)
 
 # AMM
 - [ ] [Constant sum AMM](https://www.desmos.com/calculator/4ro4f7iwlz)
