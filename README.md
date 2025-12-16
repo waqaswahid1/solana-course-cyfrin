@@ -42,26 +42,11 @@ TODO: clean up
     - [ ] [How is the program id derived?](./notes/program-id.md)
     - [ ] [Limitations](https://solana.com/docs/programs/limitations)
 - [Anchor](./apps/hello/anchor)
-    - [ ] https://www.anchor-lang.com/docs/basics/program-structure
-        - `declare_id` -> Anchor.toml
-        - `#program`
-        - `Accounts`
-        - `anchor keys sync`
 
 # Oracle
 - [ ] [Native](./apps/oracle/native)
-    - [ ] State
-        - Program owns oracle account
-        - Oracle data space
-        - Order of account is important
-        - `owner` must sign
+    - [ ] [State](./notes/state.md)
 - [ ] [Anchor](./apps/oracle/anchor)
-    - `Signer`
-    - `mut`
-    - `init`
-        - `InitSpace`
-        - Discriminator
-    - `constraint`
 
 # Piggy bank - PDA
 - [Native](./apps/piggy-bank/native)
