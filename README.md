@@ -38,23 +38,23 @@ TODO: clean up
 - [x] [IDL](https://solana.com/developers/guides/advanced/idls)
 
 # Hello
+- [x] [How is the program id derived?](./notes/program-id.md)
+- [x] [Limitations](https://solana.com/docs/programs/limitations)
 - [Native](./apps/hello/native)
-    - [ ] [How is the program id derived?](./notes/program-id.md)
-    - [ ] [Limitations](https://solana.com/docs/programs/limitations)
 - [Anchor](./apps/hello/anchor)
 
 # Oracle
+- [x] [State](./notes/state.md)
 - [Native](./apps/oracle/native)
-    - [ ] [State](./notes/state.md)
 - [Anchor](./apps/oracle/anchor)
 
 # Piggy bank - PDA
+- [x] [Manually transfer of SOL](./notes/transfer-sol.png)
 - [Native](./apps/piggy/native)
-    - [ ] [Manually transfer of SOL](./notes/transfer-sol.png)
 - [Anchor](./apps/piggy/anchor)
 
 # Dutch auction
-- [ ] [SPL Token](./notes/spl.png)
+- [x] [SPL Token](./notes/spl.png)
 - [ ] [Token CLI](./notes/token.md)
     - Create mint
         - Mint account state
@@ -73,8 +73,10 @@ TODO: clean up
 - [Anchor](./apps/cpi/anchor)
     - [ ] IDL
     - compile counter
+    ```
         // In project root, copy IDL files to idls
         //  cp target/idl/*.json ./idls/
+    ```
 - [Native](./apps/cpi/native)
     - No auto generated IDL
 
