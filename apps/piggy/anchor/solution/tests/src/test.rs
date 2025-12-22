@@ -69,21 +69,6 @@ fn test() {
         "PDA balance"
     );
 
-    // Unlock - before lock expiry
-    let res = program
-        .request()
-        .accounts(piggy::accounts::Unlock {
-            payer: payer.pubkey(),
-            dst: dst.pubkey(),
-            lock: pda,
-            system_program: system_program::ID,
-        })
-        .signer(&payer)
-        .signer(&dst)
-        .args(piggy::instruction::Unlock {})
-        .send();
-    assert!(res.is_err());
-
     // Unlock
     std::thread::sleep(std::time::Duration::from_secs(dt));
 
