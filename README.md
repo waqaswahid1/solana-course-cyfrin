@@ -21,7 +21,6 @@ Please refer to this for an in-depth explanation of the content:
 - [Discord](https://discord.gg/cyfrin) - Join a community of 3000+ developers and auditors
 - [Codehawks](https://codehawks.com) - Smart contracts auditing competitions to help secure web3
 
-
 # Course intro
 
 - [Course intro](./notes/course_intro.md)
