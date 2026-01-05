@@ -80,3 +80,4 @@ Please refer to this for an in-depth explanation of the content:
 - [Solana explorer](https://explorer.solana.com/)
 - [crates.io](https://crates.io/)
 - [Solana playground](https://beta.solpg.io/)
+- [Advanced Solana Vulnerabilities w/ r0bre](https://www.youtube.com/watch?v=sStIk5YyWdc)
