@@ -6,7 +6,7 @@ But there is a bug in this program. Find the bug and update the price without th
 
 # Task 1 - Write your exploit
 
-Write your exploit inside [`test`](https://github.com/Cyfrin/solana-course/blob/main/apps/ctf/signer/exercise/tests/test.rs#L56).
+Write your exploit inside [`test`](https://github.com/Cyfrin/solana-course/blob/main/apps/ctf/signer/exercise/tests/test.rs).
 
 # Build
 
