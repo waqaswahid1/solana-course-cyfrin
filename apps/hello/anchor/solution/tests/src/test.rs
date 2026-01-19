@@ -15,7 +15,7 @@ fn test() {
     let payer = read_keypair_file(&anchor_wallet).unwrap();
 
     let client = Client::new_with_options(
-        Cluster::Localnet,
+        Cluster::Devnet,
         &payer,
         CommitmentConfig::confirmed(),
     );

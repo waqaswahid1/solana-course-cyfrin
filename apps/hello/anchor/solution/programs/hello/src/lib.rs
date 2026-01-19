@@ -5,7 +5,7 @@ use anchor_lang::prelude::*;
 // Anchor’s runtime will reject deployment
 // Same public key as
 // solana address -k target/deploy/hello-keypair.json
-declare_id!("3cWVVxc4maKa8tWdhFSizoKGfsEVZcS8ubZBi2WgvUgy");
+declare_id!("1ZQgkLKuc8wDctkAhbbD7jjQCiFvPHkLBHc16W7hPDx");
 
 #[program]
 pub mod hello {
